@@ -1,6 +1,8 @@
 package com.itheima.service.impl;
 
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.itheima.mapper.EmpMapper;
 import com.itheima.pojo.Emp;
 import com.itheima.pojo.PageResult;
@@ -26,6 +28,7 @@ public class EmpServiceImpl implements EmpService {
 //            pageSize = 10;
 //        }
 
+        /* ============ 方式一：手工分页(原写法，已注释，仅作对比) ============
         //1.调用Mapper接口，查询总记录数
         Long total = empMapper.count();
 
@@ -35,5 +38,18 @@ public class EmpServiceImpl implements EmpService {
 
         //3.封装结果PageResult
         return new PageResult<Emp>(total, rows);
+        =================================================================== */
+
+        /* ============ 方式二：PageHelper 分页(现用写法) ============ */
+        //1.设置分页参数(PageHelper 只对它后面紧邻的第一条查询生效)
+        PageHelper.startPage(page, pageSize);
+
+        //2.调用Mapper接口，查询结果列表
+        //无需再传起始索引：插件会自动追加 limit，并自动执行一条 count 查询统计总记录数
+        List<Emp> rows = empMapper.list();
+
+        //3.封装结果PageResult(PageInfo 中包含总记录数 total 和当前页数据 list)
+        PageInfo<Emp> pageInfo = new PageInfo<>(rows);
+        return new PageResult<Emp>(pageInfo.getTotal(), pageInfo.getList());
     }
 }
