@@ -2,8 +2,10 @@ package com.itheima.mapper;
 
 import com.itheima.pojo.Emp;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Mapper
@@ -27,7 +29,29 @@ public interface EmpMapper {
      * 特点：SQL 里不写 limit，插件会自动追加 limit，并自动执行一条 count 查询
      *       方法不再需要任何分页参数，只关心"查询哪些数据"
      */
-    @Select("select e.*, d.name deptName from emp e left join dept d on e.dept_id=d.id " +
-            "order by e.update_time desc")
-    public List<Emp> list();
+    @Select("""
+            <script>
+            select e.*, d.name deptName
+            from emp e left join dept d on e.dept_id = d.id
+            <where>
+                <if test="name != null and name != ''">
+                    and e.name like concat('%', #{name}, '%')
+                </if>
+                <if test="gender != null">
+                    and e.gender = #{gender}
+                </if>
+                <if test="begin != null">
+                    and e.entry_date &gt;= #{begin}
+                </if>
+                <if test="end != null">
+                    and e.entry_date &lt;= #{end}
+                </if>
+            </where>
+            order by e.update_time desc
+            </script>
+            """)
+    public List<Emp> list(@Param("name") String name,
+                          @Param("gender") Integer gender,
+                          @Param("begin") LocalDate begin,
+                          @Param("end") LocalDate end);
 }

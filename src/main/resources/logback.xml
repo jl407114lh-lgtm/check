@@ -8,8 +8,30 @@
         </encoder>
     </appender>
 
+    <!--
+      系统文件输出(默认不启用)：需要把日志写文件时，去掉下面这一整段的注释符号，
+      再把 root 里的 <appender-ref ref="FILE" /> 一起取消注释即可。
+
+      <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+          <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+              日志文件输出的文件名, %i表示序号
+              <FileNamePattern>D:\SpringBootProject\web-ai-project02\tlias-web-management-%d{yyyy-MM-dd}-%i.log</FileNamePattern>
+              最多保留的历史日志文件数量
+              <MaxHistory>30</MaxHistory>
+              最大文件大小，超过这个大小会触发滚动到新文件，默认为10MB
+              <maxFileSize>10MB</maxFileSize>
+          </rollingPolicy>
+
+          <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+              <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+          </encoder>
+      </appender>
+    -->
+
     <!-- 日志输出级别 -->
-    <root level="debug">
+    <root level="info">
         <appender-ref ref="STDOUT" />
+        <!-- 文件输出：需要写文件时取消注释（同时把上面 FILE appender 那段也取消注释） -->
+        <!-- <appender-ref ref="FILE" /> -->
     </root>
 </configuration>

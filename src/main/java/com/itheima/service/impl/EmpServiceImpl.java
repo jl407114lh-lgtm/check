@@ -10,6 +10,7 @@ import com.itheima.service.EmpService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -19,7 +20,9 @@ public class EmpServiceImpl implements EmpService {
     private EmpMapper empMapper;
 
     @Override
-    public PageResult<Emp> page(Integer page, Integer pageSize) {
+    public PageResult<Emp> page(Integer page, Integer pageSize,
+                                String name, Integer gender,
+                                LocalDate begin, LocalDate end) {
 //        //0.参数兜底：页码从1开始，每页条数默认10，避免出现负数起始索引
 //        if (page == null || page < 1) {
 //            page = 1;
@@ -44,9 +47,10 @@ public class EmpServiceImpl implements EmpService {
         //1.设置分页参数(PageHelper 只对它后面紧邻的第一条查询生效)
         PageHelper.startPage(page, pageSize);
 
-        //2.调用Mapper接口，查询结果列表
+        //2.调用Mapper接口，按条件查询结果列表
         //无需再传起始索引：插件会自动追加 limit，并自动执行一条 count 查询统计总记录数
-        List<Emp> rows = empMapper.list();
+        //条件为 null 或空串时，Mapper 里的 <if> 会自动跳过该条件
+        List<Emp> rows = empMapper.list(name, gender, begin, end);
 
         //3.封装结果PageResult(PageInfo 中包含总记录数 total 和当前页数据 list)
         PageInfo<Emp> pageInfo = new PageInfo<>(rows);
