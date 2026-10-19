@@ -31,7 +31,7 @@
     <!-- 日志输出级别 -->
     <root level="info">
         <appender-ref ref="STDOUT" />
-        <!-- 文件输出：需要写文件时取消注释（同时把上面 FILE appender 那段也取消注释） -->
+<!--         文件输出：需要写文件时取消注释（同时把上面 FILE appender 那段也取消注释） -->
         <!-- <appender-ref ref="FILE" /> -->
     </root>
 </configuration>

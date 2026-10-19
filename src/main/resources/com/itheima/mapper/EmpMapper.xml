@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+    位置与接口"同包同名"：resources/com/itheima/mapper/EmpMapper.xml
+    namespace 必须和 Mapper 接口的全限定名一致
+-->
+<mapper namespace="com.itheima.mapper.EmpMapper">
+
+    <!--
+        分页/条件查询员工数据
+        动态条件：姓名模糊、性别精确、入职日期范围；条件为空时 <if> 会自动跳过
+        分页不用写 limit，PageHelper 会自动追加
+    -->
+    <select id="list" resultType="com.itheima.pojo.Emp">
+        select e.*, d.name deptName
+        from emp e
+        left join dept d on e.dept_id = d.id
+        <where>
+            <if test="name != null and name != ''">
+                and e.name like concat('%', #{name}, '%')
+            </if>
+            <if test="gender != null">
+                and e.gender = #{gender}
+            </if>
+            <if test="begin != null">
+                and e.entry_date &gt;= #{begin}
+            </if>
+            <if test="end != null">
+                and e.entry_date &lt;= #{end}
+            </if>
+        </where>
+        order by e.update_time desc
+    </select>
+
+</mapper>
