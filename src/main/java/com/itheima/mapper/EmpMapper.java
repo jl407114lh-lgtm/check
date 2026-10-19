@@ -1,11 +1,9 @@
 package com.itheima.mapper;
 
 import com.itheima.pojo.Emp;
+import com.itheima.pojo.EmpQueryParam;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Mapper
@@ -53,13 +51,20 @@ public interface EmpMapper {
      */
 
     /*
-     * ===================== XML 映射文件方式(现用写法) =====================
-     * SQL 写在 resources/mapper/EmpMapper.xml 里，通过 namespace + id 与这里对应，
-     * 需要在 application.yml 中配置 mybatis.mapper-locations: classpath:mapper/*.xml
-     * 分页仍由 PageHelper 自动完成：插件会自动追加 limit，并自动执行 count 查询
+     * ===================== 原写法：多个参数(已注释，仅作对比) =====================
+     * 特点：参数一多，方法签名就很长；调用方要按顺序传，漏传/传错位置编译期发现不了
+     *
+     * public List<Emp> list(@Param("name") String name,
+     *                       @Param("gender") Integer gender,
+     *                       @Param("begin") LocalDate begin,
+     *                       @Param("end") LocalDate end);
+     * =============================================================================
      */
-    public List<Emp> list(@Param("name") String name,
-                          @Param("gender") Integer gender,
-                          @Param("begin") LocalDate begin,
-                          @Param("end") LocalDate end);
+
+    /*
+     * 现用写法：查询条件封装成 EmpQueryParam 对象
+     * SQL 在 resources/com/itheima/mapper/EmpMapper.xml 里(同包同名)，
+     * MyBatis 把该对象当作唯一的参数对象，XML 里可以直接用 #{name}、#{gender} 取属性
+     */
+    public List<Emp> list(EmpQueryParam param);
 }
