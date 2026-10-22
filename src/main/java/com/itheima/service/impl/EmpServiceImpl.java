@@ -3,22 +3,32 @@ package com.itheima.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.itheima.mapper.EmpExprMapper;
 import com.itheima.mapper.EmpMapper;
-import com.itheima.pojo.Emp;
-import com.itheima.pojo.EmpQueryParam;
-import com.itheima.pojo.PageResult;
+import com.itheima.pojo.*;
+import com.itheima.service.EmpLogService;
 import com.itheima.service.EmpService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 public class EmpServiceImpl implements EmpService {
 
     @Autowired
     private EmpMapper empMapper;
 
+    @Autowired
+    private EmpExprMapper empExprMapper;
+
+    @Autowired
+    private EmpLogService empLogService;
     /*
      * ===================== 改造说明 =====================
      * 原来方法有 6 个参数(page、pageSize、name、gender、begin、end)；
@@ -50,6 +60,63 @@ public class EmpServiceImpl implements EmpService {
         PageInfo<Emp> pageInfo = new PageInfo<>(rows);
         return new PageResult<Emp>(pageInfo.getTotal(), pageInfo.getList());
     }
+
+    @Override
+    @Transactional
+    public void save(Emp emp) {
+        try {
+            //1.保存员工基本信息
+            LocalDateTime now = LocalDateTime.now();
+            emp.setCreateTime(now);
+            emp.setUpdateTime(now);
+            empMapper.insert(emp);
+
+            //2.保存员工工作经历信息
+            List<EmpExpr> exprList = emp.getExprList();
+            if(!CollectionUtils.isEmpty(exprList)){
+                //遍历集合，为empId赋值
+                exprList.forEach(empExpr -> {
+                    empExpr.setEmpId(emp.getId());
+                });
+                empExprMapper.insertBatch(exprList);
+            }
+
+            //3.记录成功日志
+            //EmpLogService 使用 REQUIRES_NEW，会挂起业务事务、独立提交日志
+            saveLog("新增员工成功: " + buildEmpInfo(emp));
+
+        } catch (Exception e) {
+            //记录失败日志；日志写入失败不能覆盖原来的业务异常
+            try {
+                saveLog("新增员工失败: " + buildEmpInfo(emp) + ", 原因: " + e.getMessage());
+            } catch (Exception logException) {
+                log.error("记录员工操作日志失败", logException);
+            }
+            //继续抛出原异常，让业务事务回滚
+            throw e;
+        }
+    }
+
+    /**
+     * 写入员工操作日志
+     */
+    private void saveLog(String info) {
+        //info 字段是 varchar(2000)，超长截断，避免日志写入失败
+        String content = info.length() > 2000 ? info.substring(0, 2000) : info;
+        empLogService.insertLog(new EmpLog(null, LocalDateTime.now(), content));
+    }
+
+    /**
+     * 拼接日志中记录的员工关键信息
+     */
+    private String buildEmpInfo(Emp emp) {
+        return "empId=" + emp.getId()
+                + ", username=" + emp.getUsername()
+                + ", name=" + emp.getName()
+                + ", deptId=" + emp.getDeptId()
+                + ", entryDate=" + emp.getEntryDate();
+    }
+
 
     /*
      * ===================== 上一版：分页参数单独传(已注释，仅作对比) =====================

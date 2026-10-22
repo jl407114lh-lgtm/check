@@ -19,3 +19,8 @@ mybatis:
   #指定 mapper 映射文件的位置
 #  mapper-locations: classpath*:com/itheima/mapper/*.xml
 
+#配置事务管理日志级别
+logging:
+  level:
+    org.springframework.jdbc.support.JdbcTransactionManager: debug
+

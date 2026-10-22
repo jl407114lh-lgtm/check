@@ -2,7 +2,9 @@ package com.itheima.mapper;
 
 import com.itheima.pojo.Emp;
 import com.itheima.pojo.EmpQueryParam;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Options;
 
 import java.util.List;
 
@@ -67,4 +69,18 @@ public interface EmpMapper {
      * MyBatis 把该对象当作唯一的参数对象，XML 里可以直接用 #{name}、#{gender} 取属性
      */
     public List<Emp> list(EmpQueryParam param);
+
+
+    /**
+     * 新增员工基本信息
+     * 现在只保存员工基本信息，所以不需要回填主键；
+     * 等要做"保存工作经历"时，再在方法上加：
+     * @Options(useGeneratedKeys = true, keyProperty = "id")
+     * 把自增主键回填到 emp.id，供 emp_expr.emp_id 使用
+     * @param emp
+     */
+    @Options(useGeneratedKeys = true,keyProperty = "id")
+    @Insert("insert into emp(username, name, gender, phone, job, salary, image, entry_date, dept_id, create_time, update_time)\n" +
+            "        values (#{username},#{name},#{gender},#{phone},#{job},#{salary},#{image},#{entryDate},#{deptId},#{createTime},#{updateTime})")
+    void insert(Emp emp);
 }

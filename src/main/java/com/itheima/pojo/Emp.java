@@ -1,5 +1,6 @@
 package com.itheima.pojo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -22,5 +23,8 @@ public class Emp {
     private LocalDateTime createTime; //创建时间
     private LocalDateTime updateTime; //修改时间
 
-    private String deptName;
+    private String deptName;//封装部门名称
+
+    //@JsonProperty("exprList") //前端提交/获取的字段名是 exprList
+    private List<EmpExpr> exprList;//封装工作经历信息
 }

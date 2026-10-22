@@ -44,4 +44,9 @@ public interface EmpService {
      * @return 总记录数 + 当前页的员工数据列表
      */
     PageResult<Emp> page(EmpQueryParam param);
+
+    /**
+     * 新增员工
+     */
+    void save(Emp emp);
 }
