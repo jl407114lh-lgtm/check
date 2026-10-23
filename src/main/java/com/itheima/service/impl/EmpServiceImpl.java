@@ -117,6 +117,18 @@ public class EmpServiceImpl implements EmpService {
                 + ", entryDate=" + emp.getEntryDate();
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteByIds(List<Integer> ids) {
+        if (CollectionUtils.isEmpty(ids)) {
+            return;
+        }
+        //先删子表(工作经历)，再删主表(员工)，两步在同一个事务里
+        empExprMapper.deleteByEmpIds(ids);
+        empMapper.deleteByIds(ids);
+        log.info("删除员工: ids={}", ids);
+    }
+
 
     /*
      * ===================== 上一版：分页参数单独传(已注释，仅作对比) =====================

@@ -5,6 +5,8 @@ import com.itheima.pojo.Emp;
 import com.itheima.pojo.EmpQueryParam;
 import com.itheima.pojo.PageResult;
 
+import java.util.List;
+
 public interface EmpService {
 
     /*
@@ -49,4 +51,10 @@ public interface EmpService {
      * 新增员工
      */
     void save(Emp emp);
+
+    /**
+     * 根据id批量删除员工(同时删除其工作经历，单个删除就是列表里只有一个id)
+     * @param ids 员工id集合
+     */
+    void deleteByIds(List<Integer> ids);
 }

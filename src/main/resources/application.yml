@@ -2,6 +2,12 @@
 spring:
   application:
     name: tlias-web-management
+  servlet:
+    multipart:
+      #单个文件最大 10MB(和前端的上传限制保持一致)
+      max-file-size: 10MB
+      #整个请求最大 100MB
+      max-request-size: 100MB
   datasource:
     #type: com.alibaba.druid.pool.DruidDataSource
     url: jdbc:mysql://localhost:3306/tlias
@@ -23,4 +29,9 @@ mybatis:
 logging:
   level:
     org.springframework.jdbc.support.JdbcTransactionManager: debug
+
+#文件上传保存目录
+tlias:
+  upload:
+    dir: D:/SpecialFile/image
 
