@@ -3,6 +3,7 @@ package com.itheima.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.itheima.exception.BusinessException;
 import com.itheima.mapper.EmpExprMapper;
 import com.itheima.mapper.EmpMapper;
 import com.itheima.pojo.*;
@@ -127,6 +128,37 @@ public class EmpServiceImpl implements EmpService {
         empExprMapper.deleteByEmpIds(ids);
         empMapper.deleteByIds(ids);
         log.info("删除员工: ids={}", ids);
+    }
+
+    @Override
+    public Emp getById(Integer id) {
+        Emp emp = empMapper.getById(id);
+        if (emp == null) {
+            throw new BusinessException("员工不存在");
+        }
+        return emp;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void update(Emp emp) {
+        //1.修改员工基本信息(动态SQL：只更新非null字段)
+        emp.setUpdateTime(LocalDateTime.now());
+        empMapper.update(emp);
+
+        //2.修改工作经历
+        //   exprList == null：没有传工作经历，保持原样不动
+        //   exprList == 空列表：用户删光了工作经历，清空
+        //   否则：先删旧的，再批量插入新的
+        List<EmpExpr> exprList = emp.getExprList();
+        if (exprList != null) {
+            empExprMapper.deleteByEmpIds(List.of(emp.getId()));
+            if (!exprList.isEmpty()) {
+                exprList.forEach(expr -> expr.setEmpId(emp.getId()));
+                empExprMapper.insertBatch(exprList);
+            }
+        }
+        log.info("修改员工: id={}", emp.getId());
     }
 
 

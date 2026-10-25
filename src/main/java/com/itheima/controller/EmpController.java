@@ -87,4 +87,23 @@ public class EmpController {
         empService.deleteByIds(ids);
         return Result.success();
     }
+
+    /**
+     * 根据id查询员工(编辑时回显基本信息和工作经历)
+     */
+    @GetMapping("/{id}")
+    public Result getById(@PathVariable Integer id){
+        log.info("查询员工: id={}", id);
+        return Result.success(empService.getById(id));
+    }
+
+    /**
+     * 修改员工(基本信息和全部工作经历)
+     */
+    @PutMapping
+    public Result update(@RequestBody Emp emp){
+        log.info("修改员工: {}", emp);
+        empService.update(emp);
+        return Result.success();
+    }
 }

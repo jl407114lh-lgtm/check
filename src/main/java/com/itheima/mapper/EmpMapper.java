@@ -2,12 +2,14 @@ package com.itheima.mapper;
 
 import com.itheima.pojo.Emp;
 import com.itheima.pojo.EmpQueryParam;
+import com.itheima.pojo.GenderData;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface EmpMapper {
@@ -89,4 +91,26 @@ public interface EmpMapper {
      * 根据id批量删除员工(单个删除就是列表里只有一个id)
      */
     void deleteByIds(@Param("ids") List<Integer> ids);
+
+    /**
+     * 根据id查询员工(含部门名称和工作经历)
+     */
+    Emp getById(Integer id);
+
+    /**
+     * 修改员工基本信息
+     */
+    void update(Emp emp);
+
+    /**
+     * 按职位统计员工人数
+     * @return 每行包含职位名称 jobName 和员工人数 empCount
+     */
+    List<Map<String, Object>> countEmpByJob();
+
+    /**
+     * 按性别统计员工人数
+     * @return 性别名称和对应的员工人数
+     */
+    List<GenderData> countEmpByGender();
 }

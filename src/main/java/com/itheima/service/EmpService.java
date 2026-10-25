@@ -57,4 +57,16 @@ public interface EmpService {
      * @param ids 员工id集合
      */
     void deleteByIds(List<Integer> ids);
+
+    /**
+     * 根据id查询员工(含部门名称和工作经历)
+     * @param id 员工id
+     */
+    Emp getById(Integer id);
+
+    /**
+     * 修改员工基本信息和工作经历
+     * @param emp 员工信息(含修改后的工作经历列表)
+     */
+    void update(Emp emp);
 }

@@ -9,6 +9,32 @@
 -->
 <mapper namespace="com.itheima.mapper.EmpMapper">
 
+    <!-- 员工详情映射：一个员工对应多条工作经历 -->
+    <resultMap id="empDetailMap" type="com.itheima.pojo.Emp">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="name" column="name"/>
+        <result property="gender" column="gender"/>
+        <result property="phone" column="phone"/>
+        <result property="job" column="job"/>
+        <result property="salary" column="salary"/>
+        <result property="image" column="image"/>
+        <result property="entryDate" column="entry_date"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deptName" column="dept_name"/>
+        <collection property="exprList" ofType="com.itheima.pojo.EmpExpr">
+            <id property="id" column="expr_id"/>
+            <result property="empId" column="emp_id"/>
+            <result property="begin" column="expr_begin"/>
+            <result property="end" column="expr_end"/>
+            <result property="company" column="company"/>
+            <result property="job" column="expr_job"/>
+        </collection>
+    </resultMap>
+
     <!--
         分页/条件查询员工数据
         动态条件：姓名模糊、性别精确、入职日期范围；条件为空时 <if> 会自动跳过
@@ -42,5 +68,74 @@
             #{id}
         </foreach>
     </delete>
+
+    <!-- 根据id查询员工，同时带出部门名称和工作经历 -->
+    <select id="getById" resultMap="empDetailMap">
+        select e.*, d.name dept_name,
+               x.id expr_id, x.emp_id, x.begin expr_begin, x.end expr_end,
+               x.company, x.job expr_job
+        from emp e
+        left join dept d on e.dept_id = d.id
+        left join emp_expr x on x.emp_id = e.id
+        where e.id = #{id}
+    </select>
+
+    <!--
+        修改员工基本信息(密码和创建时间不修改)
+        使用 <set> + <if> 实现动态更新：只更新传入的非 null 字段，
+        避免"只改部分字段"时把其他字段覆盖成 null
+    -->
+    <update id="update">
+        update emp
+        <set>
+            <if test="username != null and username != ''">username = #{username},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="phone != null and phone != ''">phone = #{phone},</if>
+            <if test="job != null">job = #{job},</if>
+            <if test="salary != null">salary = #{salary},</if>
+            <if test="image != null and image!='' ">image = #{image},</if>
+            <if test="entryDate != null">entry_date = #{entryDate},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            update_time = #{updateTime}
+        </set>
+        where id = #{id}
+    </update>
+
+    <!-- 按职位代码分组统计人数，并转换成前端需要的中文职位名称 -->
+    <select id="countEmpByJob" resultType="java.util.Map">
+        select
+            case job
+                when 1 then '班主任'
+                when 2 then '讲师'
+                when 3 then '学工主管'
+                when 4 then '教研主管'
+                when 5 then '咨询师'
+                else '其他'
+            end as jobName,
+            count(*) as empCount
+        from emp
+        group by job
+        order by empCount
+    </select>
+
+    <!-- 性别统计结果直接映射为前端饼图需要的 name、value 结构 -->
+    <resultMap id="genderDataMap" type="com.itheima.pojo.GenderData">
+        <result property="name" column="name"/>
+        <result property="value" column="emp_count"/>
+    </resultMap>
+
+    <select id="countEmpByGender" resultMap="genderDataMap">
+        select
+            case gender
+                when 1 then '男'
+                when 2 then '女'
+                else '其他'
+            end as name,
+            count(*) as emp_count
+        from emp
+        group by gender
+        order by gender
+    </select>
 
 </mapper>
